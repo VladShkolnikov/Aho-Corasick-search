@@ -1,0 +1,95 @@
+
+class Tree:
+    def __init__(self,*args):
+        self.NullNode=Node()
+        self.NullNode.SuffixLink=self.NullNode
+        self.NullNode.SuffixLinkSum=0
+        self.NodeList=[self.NullNode]
+        #establish tree nodes with parent-child links 
+        for string in args:
+            node=self.NullNode
+            for char in string:
+                if char in node.Dict:
+                    node=node.Dict[char]
+                else:
+                    newnode=Node(False,node,char)
+                    node.Dict[char]=newnode
+                    self.NodeList.append(newnode)
+                    node=newnode
+            node.Leaf=True
+
+        for node in self.NodeList:
+            self.GenerateSuffixLink(node)
+
+        for node in self.NodeList:
+            self.GenerateSuffixSum(node)
+                
+
+        
+            
+
+    def GenerateSuffixLink(self,node):
+        if node.SuffixLink!=None:
+            return None
+
+        Parent=node.Parent
+        char=node.name
+
+        if Parent.SuffixLink==None:
+            self.GenerateSuffixLink(Parent)
+        while Parent!=self.NullNode and node.name not in Parent.SuffixLink.Dict:
+            Parent=Parent.SuffixLink
+            if Parent.SuffixLink==None:
+                self.GenerateSuffixLink(Parent)
+        if Parent==self.NullNode:
+            node.SuffixLink=self.NullNode
+        elif node.name in Parent.SuffixLink.Dict:
+            node.SuffixLink=Parent.SuffixLink.Dict[node.name]
+            
+
+    def GenerateSuffixSum(self,node):
+        if node.SuffixLinkSum!=None:
+            return 0
+        if node.SuffixLink.SuffixLinkSum==None:
+            self.GenerateSuffixSum(node.SuffixLink)
+        if node.Leaf:
+            node.SuffixLinkSum=1+node.SuffixLink.SuffixLinkSum
+        else:
+            node.SuffixLinkSum=node.SuffixLink.SuffixLinkSum
+
+
+class Node:
+    def __init__(self,Bool=False,parent=None,name=''):
+        self.name=name
+        self.Dict={}
+        self.Leaf=Bool
+        self.Parent=parent
+        self.SuffixLink=None
+        self.SuffixLinkSum=None
+
+
+#define string s befoe using (or s1,s2,s3,... if there are many strings in the set) 
+mytree=Tree(s)
+
+def occurences(a):
+
+    length=len(a)
+    result=0
+    node=mytree.NullNode
+    for i in range(length):
+        result+=node.SuffixLinkSum
+        if a[i] in node.Dict:
+            node=node.Dict[a[i]]
+        else:
+            node=node.SuffixLink
+            while node!=mytree.NullNode and a[i] not in node.Dict:
+                node=node.SuffixLink
+            if a[i] in node.Dict:
+                node=node.Dict[a[i]]
+    result+=node.SuffixLinkSum
+
+
+    return result
+    
+
+print(occurences(a))
